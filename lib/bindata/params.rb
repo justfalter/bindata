@@ -1,4 +1,5 @@
 require 'bindata/lazy'
+require 'set'
 
 module BinData
   # BinData objects accept parameters when initializing.  AcceptedParameters
@@ -8,10 +9,10 @@ module BinData
 
     def self.invalid_parameter_names
       unless defined? @invalid_names
-        all_names = LazyEvaluator.instance_methods(true) + Kernel.methods
-        all_names.collect! { |name| name.to_s }
-        allowed_names = ["type"]
-        @invalid_names = all_names - allowed_names
+        @invalid_names = Set.new
+        @invalid_names.merge LazyEvaluator.instance_methods.collect {|name| name.to_sym}
+        @invalid_names.merge Kernel.methods.collect {|name| name.to_sym}
+        @invalid_names.delete :type
       end
       @invalid_names
     end
@@ -71,8 +72,9 @@ module BinData
     def ensure_valid_names(names)
       invalid_names = self.class.invalid_parameter_names
       names.each do |name|
+        sym_name = name.to_sym
         name = name.to_s
-        if invalid_names.include?(name)
+        if invalid_names.include?(sym_name)
           raise NameError.new("Rename parameter '#{name}' " +
                               "as it shadows an existing method.", name)
         end
