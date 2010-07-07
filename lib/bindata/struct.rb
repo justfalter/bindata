@@ -1,4 +1,5 @@
 require 'bindata/base'
+require 'set'
 
 module BinData
   # A Struct is an ordered collection of named data objects.
@@ -50,12 +51,17 @@ module BinData
     register(self.name, self)
 
     # These reserved words may not be used as field names
-    RESERVED = (::Hash.instance_methods.collect { |meth| meth.to_s } + 
-                %w{alias and begin break case class def defined do else elsif
-                   end ensure false for if in module next nil not or redo
-                   rescue retry return self super then true undef unless until
-                   when while yield} +
-                %w{array element index value} ).uniq
+    RESERVED = Set.new.merge([:alias, :and, :begin, :break, :case, :class, 
+      :def, :defined, :do, :else, :elsif, :end, :ensure, :false, :for, :if, 
+      :in, :module, :next, :nil, :not, :or, :redo, :rescue, :retry, :return,
+      :self, :super, :then, :true, :undef, :unless, :until, :when, :while, 
+      :yield] + [:array, :element, :index, :value] + ::Hash.instance_methods)
+    # RESERVED = (::Hash.instance_methods.collect { |meth| meth.to_s } + 
+    #             %w{alias and begin break case class def defined do else elsif
+    #                end ensure false for if in module next nil not or redo
+    #                rescue retry return self super then true undef unless until
+    #                when while yield} +
+    #             %w{array element index value} ).uniq
 
     # A hash that can be accessed via attributes.
     class Snapshot < Hash #:nodoc:
@@ -117,15 +123,14 @@ module BinData
       end
 
       def ensure_field_names_are_valid(field_names)
-        instance_methods = self.instance_methods.collect { |meth| meth.to_s }
-        reserved_names = RESERVED
-
         field_names.each do |name|
-          if instance_methods.include?(name)
+          sym_name = name.to_sym
+
+          if method_defined?(sym_name)
             raise NameError.new("Rename field '#{name}' in #{self}, " +
                                 "as it shadows an existing method.", name)
           end
-          if reserved_names.include?(name)
+          if RESERVED.include?(sym_name)
             raise NameError.new("Rename field '#{name}' in #{self}, " +
                                 "as it is a reserved name.", name)
           end

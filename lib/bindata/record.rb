@@ -132,14 +132,16 @@ module BinData
       end
 
       def ensure_valid_name(name)
+        sym_name = name.to_sym
+        
         if fields.field_names.include?(name)
           raise SyntaxError, "duplicate field '#{name}' in #{self}", caller(3)
         end
-        if self.instance_methods.collect { |meth| meth.to_s }.include?(name)
+        if self.method_defined?(sym_name)
           raise NameError.new("", name),
                 "field '#{name}' shadows an existing method in #{self}", caller(3)
         end
-        if self::RESERVED.include?(name)
+        if self::RESERVED.include?(sym_name)
           raise NameError.new("", name),
                 "field '#{name}' is a reserved name in #{self}", caller(3)
         end
