@@ -99,9 +99,10 @@ module BinData
       private
 
       def parent_record
-        ancestors[1..-1].find { |cls|
-          cls.ancestors[1..-1].include?(BinData::Record)
-        }
+        if superclass == BinData::Record
+          return nil
+        end
+        superclass
       end
 
       def default_endian
