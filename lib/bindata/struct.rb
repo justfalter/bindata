@@ -55,7 +55,9 @@ module BinData
       :def, :defined, :do, :else, :elsif, :end, :ensure, :false, :for, :if, 
       :in, :module, :next, :nil, :not, :or, :redo, :rescue, :retry, :return,
       :self, :super, :then, :true, :undef, :unless, :until, :when, :while, 
-      :yield] + [:array, :element, :index, :value] + ::Hash.instance_methods)
+      :yield] + [:array, :element, :index, :value])
+    RESERVED.merge ::Hash.instance_methods.collect {|meth| meth.to_sym}
+    
     # RESERVED = (::Hash.instance_methods.collect { |meth| meth.to_s } + 
     #             %w{alias and begin break case class def defined do else elsif
     #                end ensure false for if in module next nil not or redo
