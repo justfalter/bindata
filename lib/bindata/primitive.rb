@@ -140,7 +140,7 @@ module BinData
         if fields.field_names.include?(name)
           raise SyntaxError, "duplicate field '#{name}' in #{self}", caller(3)
         end
-        if self.instance_methods.collect { |meth| meth.to_s }.include?(name)
+        if self.method_defined?(name.to_sym)
           raise NameError.new("", name),
                 "field '#{name}' shadows an existing method in #{self}", caller(3)
         end
