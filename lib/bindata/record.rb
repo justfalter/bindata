@@ -133,7 +133,7 @@ module BinData
       end
 
       def ensure_valid_name(name)
-        sym_name = name.to_sym
+        sym_name = name.to_sym rescue return
         
         if fields.field_names.include?(name)
           raise SyntaxError, "duplicate field '#{name}' in #{self}", caller(3)
