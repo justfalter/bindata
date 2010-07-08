@@ -103,10 +103,10 @@ module BinData
 
     attr_reader :parent
 
-    # Returns the result of evaluating the parameter identified by +key+.
+    # @return [Object, nil] the result of evaluating the parameter identified by +key+.
     # +overrides+ is an optional +parameters+ like hash that allow the
     # parameters given at object construction to be overridden.
-    # Returns nil if +key+ does not refer to any parameter.
+    # nil if +key+ does not refer to any parameter.
     def eval_parameter(key, overrides = {})
       LazyEvaluator.eval(self, get_parameter(key), overrides)
     end
@@ -114,16 +114,22 @@ module BinData
     # Returns the parameter referenced by +key+.
     # Use this method if you are sure the parameter is not to be evaluated.
     # You most likely want #eval_parameter.
+    # @param [Symbol] key
+    # @return [Object, nil]
     def get_parameter(key)
       @params[key]
     end
 
     # Returns whether +key+ exists in the +parameters+ hash.
+    # @param [Symbol] key
+    # @param [Boolean] true if the key exists
     def has_parameter?(key)
       @params.has_parameter?(key)
     end
 
     # Reads data into this data object.
+    # @param [String, BinData::IO] io The data to read
+    # @return [self] This object
     def read(io)
       io = BinData::IO.new(io) unless BinData::IO === io
 
@@ -132,18 +138,23 @@ module BinData
       self
     end
 
+    # @param [BinData::IO] io The IO object to read from
+    # @return [Array<BinData::Base>, nil] An array of BinData::Base based objects
     def do_read(io) #:nodoc:
       check_or_adjust_offset(io)
       clear
       _do_read(io)
     end
-
+    
+    # @return [void] Undefined
     def done_read #:nodoc:
       _done_read
     end
     protected :do_read, :done_read
 
     # Writes the value for this data to +io+.
+    # @param [BinData::IO, StringIO] io The IO object
+    # @return [self] Returns self
     def write(io)
       io = BinData::IO.new(io) unless BinData::IO === io
 
@@ -152,16 +163,20 @@ module BinData
       self
     end
 
+    # @param [BinData::IO] io The IO object
+    # @return [Array<BinData::Base>] Array of BinData objects
     def do_write(io) #:nodoc:
       _do_write(io)
     end
     protected :do_write
 
-    # Returns the number of bytes it will take to write this data.
+    # @return [Fixnum] the number of bytes it will take to write this data.
     def num_bytes
       do_num_bytes.ceil
     end
 
+    # @return [Fixnum, Float] If an integer, the number of whole bytes. A float
+    # represents a fraction of bytes (which should be a multiple of 1/8.0)
     def do_num_bytes #:nodoc:
       _do_num_bytes
     end
@@ -169,16 +184,18 @@ module BinData
 
     # Assigns the value of +val+ to this data object.  Note that +val+ will
     # always be deep copied to ensure no aliasing problems can occur.
+    # @param [Object] val The value to assign
     def assign(val)
       _assign(val)
     end
 
     # Returns a snapshot of this data object.
+    # @return [Object, Array<Object>]
     def snapshot
       _snapshot
     end
 
-    # Returns the string representation of this data object.
+    # @return [String] the string representation of this data object.
     def to_binary_s
       io = BinData::IO.create_string_io
       write(io)
@@ -201,7 +218,7 @@ module BinData
       pp.pp(snapshot)
     end
 
-    # Returns a user friendly name of this object for debugging purposes.
+    # @return [String] user friendly name of this object for debugging purposes.
     def debug_name
       if parent
         parent.debug_name_of(self)
@@ -210,7 +227,7 @@ module BinData
       end
     end
 
-    # Returns the offset of this object wrt to its most distant ancestor.
+    # @return [Fixnum] the offset of this object wrt to its most distant ancestor.
     def offset
       if parent
         parent.offset + parent.offset_of(self)
@@ -219,7 +236,7 @@ module BinData
       end
     end
 
-    # Returns the offset of this object wrt to its parent.
+    # @param [Fixnum] the offset of this object wrt to its parent.
     def rel_offset
       if parent
         parent.offset_of(self)

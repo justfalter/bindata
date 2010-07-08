@@ -146,11 +146,12 @@ module BinData
       @field_names = get_parameter(:fields).field_names
       @field_objs  = []
     end
-
+    
     def clear #:nodoc:
       @field_objs.each { |f| f.clear unless f.nil? }
     end
 
+    # @return [Boolean]
     def clear? #:nodoc:
       @field_objs.inject(true) { |all_clear, f| all_clear and (f.nil? or f.clear?) }
     end
@@ -158,6 +159,9 @@ module BinData
     # Returns a list of the names of all fields accessible through this
     # object.  +include_hidden+ specifies whether to include hidden names
     # in the listing.
+    # @param [Boolean, nil] include_hidden (false) If true, returns hidden fields
+    #  as well.
+    # @return [Array<String>] Array of String field names
     def field_names(include_hidden = false)
       if include_hidden
         @field_names.compact
@@ -181,11 +185,15 @@ module BinData
       end
     end
 
+    # @param [BinData::Base] child
+    # @param [String] A stringified version of the name
     def debug_name_of(child) #:nodoc:
       field_name = @field_names[find_index_of(child)]
       "#{debug_name}.#{field_name}"
     end
 
+    # @param [BinData::Base] child
+    # @return [Fixnum] the offset for the child
     def offset_of(child) #:nodoc:
       instantiate_all_objs
       sum = sum_num_bytes_below_index(find_index_of(child))
@@ -277,6 +285,7 @@ module BinData
       end
     end
 
+    # @return [BinData::Struct::Snapshot] Snapshot of the object.
     def _snapshot
       snapshot = Snapshot.new
       field_names.each do |name|
